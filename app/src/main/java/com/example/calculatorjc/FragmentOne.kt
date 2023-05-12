@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import com.example.calculatorjc.ResourcesClass.Companion.reset
 import com.example.calculatorjc.ui.theme.black
 import com.example.calculatorjc.ui.theme.pink
 
@@ -49,7 +50,6 @@ class FragmentOne : Fragment() {
 
     private var isBtnDisabled by mutableStateOf(false)
 
-    private lateinit var reset: String
 
     private val actionOrResItems = mutableStateListOf<ActionOrResItem>()
 
@@ -111,7 +111,6 @@ class FragmentOne : Fragment() {
         mulObj = ActionOrResItem(buttonItem, ResourcesClass.multiply)
         divObj = ActionOrResItem(buttonItem, ResourcesClass.division)
 
-        reset = ResourcesClass.reset
 
         //This function will add result(if result available) and reset button into the adapter when orientation change
         addResult()
@@ -219,7 +218,7 @@ class FragmentOne : Fragment() {
             onClick = {
                     actionText = actionOrResItems[index].text
                     if (actionText == reset) {
-                        (activity as MainActivity).isNavBtnVisible = false
+                        (activity as MainActivity).isTopAppBarVisible = false
                         resultText = ""
                         arguments = null
                         actionOrResItems.clear()

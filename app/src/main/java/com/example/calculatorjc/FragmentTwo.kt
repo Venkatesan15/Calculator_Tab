@@ -50,7 +50,7 @@ class FragmentTwo : Fragment() {
     private var inputOne by mutableStateOf("")
     private var inputTwo by mutableStateOf("")
 
-    private var visible by mutableStateOf(false)
+    private var animationVisibility by mutableStateOf(false)
 
     companion object {
         const val inputOneKey = "InputOne"
@@ -119,10 +119,10 @@ class FragmentTwo : Fragment() {
         val focusManager = LocalFocusManager.current
 
         LaunchedEffect( key1 = Unit, block = {
-            visible = true
+            animationVisibility = true
         } )
 
-        AnimatedVisibility(visible = visible,
+        AnimatedVisibility(visible = animationVisibility,
             enter =  slideInHorizontally(
             tween(
             durationMillis = 400),
@@ -170,7 +170,7 @@ class FragmentTwo : Fragment() {
                 }
                 ActionButton(
                     btnModifier, focusManager, isTab
-                ) { visible = false }
+                ) { animationVisibility = false }
 
             }
         }

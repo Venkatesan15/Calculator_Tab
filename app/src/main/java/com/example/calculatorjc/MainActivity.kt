@@ -52,12 +52,12 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
 
     private lateinit var fragmentTwo: FragmentTwo
     private lateinit var fragmentOne: FragmentOne
-    private lateinit var containerOne: FrameLayout
+    private lateinit var actionFrgContainer: FrameLayout
 
     private var containerOneId = 0
     private var containerTwoId = 1
 
-    var isNavBtnVisible by mutableStateOf(false)
+    var isTopAppBarVisible by mutableStateOf(false)
 
     companion object {
         const val fragmentOneTag = "FragmentOne"
@@ -79,9 +79,8 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         }
         supportFragmentManager.addFragmentOnAttachListener(listener)
 
-        fragmentOne = FragmentOne()
 
-        if(savedInstanceState != null && savedInstanceState.getBoolean(isBackBtnVisibleTag)) isNavBtnVisible = true
+        if(savedInstanceState != null && savedInstanceState.getBoolean(isBackBtnVisibleTag)) isTopAppBarVisible = true
 
         setContent {
 
@@ -89,7 +88,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
 
             CalculatorJCTheme {
                 Scaffold(
-                    topBar = { if (isNavBtnVisible) AddTopAppBar() },
+                    topBar = { if (isTopAppBarVisible) AddTopAppBar() },
                     content = { paddingValues -> InflateFragments(paddingValues) }
                 )
             }
@@ -187,8 +186,10 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         AndroidView(
             factory = {
                 FrameLayout(it).apply {
+
+                    fragmentOne = FragmentOne()
                     id = containerOneId
-                    containerOne = this
+                    actionFrgContainer = this
 
                     val frg: Fragment? = supportFragmentManager.findFragmentByTag(fragmentOneTag)
 
@@ -248,7 +249,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         if (frgB != null) {
             outState.putBundle(fragTwoArg, frgB.arguments)}
 
-        outState.putBoolean(isBackBtnVisibleTag, isNavBtnVisible)
+        outState.putBoolean(isBackBtnVisibleTag, isTopAppBarVisible)
         outState.putBoolean(isFrgBVisibleNow, isFrgBVisible)
         super.onSaveInstanceState(outState)
     }
@@ -257,7 +258,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
     //This function is used for send the Action(Add, Subtract,..) from FragmentOne to FragmentTwo
     override fun sendActionText(text: String): Boolean {
 
-        isNavBtnVisible = true
+        isTopAppBarVisible = true
         isFrgBVisible = true
 
         val bundle = Bundle()
@@ -268,7 +269,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
             val frgA = supportFragmentManager.findFragmentByTag(fragmentOneTag)
             if (frgA != null) {
 
-                containerOne.visibility = View.GONE
+                actionFrgContainer.visibility = View.GONE
 
             }
         }
@@ -298,7 +299,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         val frgA = supportFragmentManager.findFragmentByTag(fragmentOneTag)
         if (frgA != null) {
             if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                containerOne.visibility = View.VISIBLE
+                actionFrgContainer.visibility = View.VISIBLE
 
             }
             frgA.arguments = bundle
@@ -387,11 +388,11 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
 
 
         if (isFrgBVisible) {
-            isNavBtnVisible = false
+            isTopAppBarVisible = false
 
             if(frgA != null) {
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    containerOne.visibility = View.VISIBLE
+                    actionFrgContainer.visibility = View.VISIBLE
                     (frgA as FragmentOne).enableButtons()
                 }
             }
@@ -404,7 +405,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         } else  {
 
             if (frgA != null) {
-                isNavBtnVisible = false
+                isTopAppBarVisible = false
                 (frgA as FragmentOne).addActionsIntoAdapter()
                 frgA.arguments = null
             }
@@ -417,13 +418,13 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         val frgB = supportFragmentManager.findFragmentByTag(frgBTag)
         val frgA = supportFragmentManager.findFragmentByTag(fragmentOneTag)
 
-        if (frgA?.arguments == null) isNavBtnVisible = false
+        if (frgA?.arguments == null) isTopAppBarVisible = false
 
         if (isFrgBVisible) {
 
             if(frgA != null) {
                 if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    containerOne.visibility = View.VISIBLE
+                    actionFrgContainer.visibility = View.VISIBLE
                     (frgA as FragmentOne).enableButtons()
                 }
             }
