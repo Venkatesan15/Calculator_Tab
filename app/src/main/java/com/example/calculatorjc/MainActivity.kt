@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
 
     private lateinit var fragmentTwo: FragmentTwo
     private lateinit var fragmentOne: FragmentOne
-    lateinit var containerOne: FrameLayout
+    private lateinit var containerOne: FrameLayout
 
     private var containerOneId = 0
     private var containerTwoId = 1

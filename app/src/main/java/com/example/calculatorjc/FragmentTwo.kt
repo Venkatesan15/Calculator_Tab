@@ -24,7 +24,6 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -95,7 +94,6 @@ class FragmentTwo : Fragment() {
             setContent {
 
                 val windowSizeClass = calculateWindowSizeClass(requireActivity())
-                val width = windowSizeClass.widthSizeClass
                 val height = windowSizeClass.heightSizeClass
 
                 val isTab: Boolean =
@@ -107,13 +105,13 @@ class FragmentTwo : Fragment() {
                     height != WindowHeightSizeClass.Compact
                 }
 
-                InflateContent(width, height, isTab)
+                InflateContent(isTab)
             }
         }
     }
 
     @Composable
-    fun InflateContent(width: WindowWidthSizeClass, height: WindowHeightSizeClass, isTab: Boolean) {
+    fun InflateContent(isTab: Boolean) {
 
         val isDarkTheme = isSystemInDarkTheme()
         val backGround = if (isDarkTheme) black else yellow
