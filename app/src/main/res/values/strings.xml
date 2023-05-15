@@ -1,17 +1,13 @@
 <resources>
     <string name="app_name">CalculatorJC</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_aczivity_main2">MainActivity2</string>
-    <string name="number_One">Number One</string>
-    <string name="number_Two">Number Two</string>
-
-    <string name="add_btn">Add</string>
-    <string name="sub_btn">Subtract</string>
-    <string name="mul_btn">Multiply</string>
-    <string name="div_btn">Division</string>
-    <string name="reset_btn">Reset</string>
-
+    <string name="result">Your Result is %1$s for inputs %2$s and %3$s with action %4$s</string>
 
     <string name="top_app_bar">CALCULATOR</string>
+    <string name="actionIconToast">This is a Simple Calculator</string>
+
+
+    <string name="dividedByZero">Divided by Zero Always Infinite</string>
+    <string name="error">Something went Wrong</string>
+    <string name="wrongInput">Please Enter Valid Input</string>
 </resources>

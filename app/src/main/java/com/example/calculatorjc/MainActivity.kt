@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,12 +29,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -101,23 +96,11 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
     private fun InflateFragments(paddingValues: PaddingValues) {
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            LoadActionFragment(Modifier, isFrgBVisible)
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-
-                contentAlignment = Center
-            ) {
-
-
-                LoadActionFragment(Modifier, isFrgBVisible)
-
-                if (isFrgBVisible) {
-                    LoadInputFragment()
-                }
+            if (isFrgBVisible) {
+                LoadInputFragment()
             }
-
         } else {
 
             Row(
@@ -128,8 +111,8 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
 
                 LoadActionFragment(
                     modifier = Modifier
-                        .width(0.dp)
-                        .weight(1f), isFrgBVisible
+                        .fillMaxWidth(0.5f),
+                    isFrgBVisible
                 )
 
                 Divider(
@@ -138,14 +121,11 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
                         .width(5.dp), color = MaterialTheme.colors.onPrimary
                 )
 
-                if (!isFrgBVisible) {
-                    Row(modifier = Modifier.weight(1f)) {}
-                }
 
                 if (isFrgBVisible) {
                     LoadInputFragment(
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(0.5f)
                             .width(0.dp)
                     )
                 }
@@ -183,6 +163,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
     @Composable
     private fun LoadActionFragment(modifier: Modifier = Modifier, isFragmentBVisible: Boolean) {
 
+
         AndroidView(
             factory = {
                 FrameLayout(it).apply {
@@ -201,6 +182,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
                         .commit()
 
                 }
+
             },
             modifier = modifier,
             update = {
@@ -268,9 +250,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             val frgA = supportFragmentManager.findFragmentByTag(fragmentOneTag)
             if (frgA != null) {
-
                 actionFrgContainer.visibility = View.GONE
-
             }
         }
 
@@ -300,7 +280,6 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         if (frgA != null) {
             if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                 actionFrgContainer.visibility = View.VISIBLE
-
             }
             frgA.arguments = bundle
             (frgA as FragmentOne).addResultIntoAdapter(result)
@@ -326,7 +305,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
     fun AddTopAppBar() {
 
 
-        val isTab: Boolean = isTab()
+        val isTab: Boolean = ResourcesClass.isTablet(context = this)
 
         val modifier = if(isTab) Modifier
             .fillMaxWidth()
@@ -335,7 +314,7 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
         val tintColor = if(isSystemInDarkTheme()) white else black
         TopAppBar(
             title = {
-                    Text(text = "Calculator", modifier = Modifier.fillMaxWidth())
+                    Text(text = ResourcesClass.calculator, modifier = Modifier.fillMaxWidth())
          },
             modifier = modifier,
 
@@ -352,27 +331,13 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
             elevation = 0.dp,
             actions = {
                 Icon(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "Logo", tint = tintColor, modifier = Modifier.clickable {
-                    Toast.makeText(this@MainActivity, "This is a Simple Calculator", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, resources.getString(R.string.actionIconToast), Toast.LENGTH_SHORT).show()
                 })
             }
         )
     }
 
-    @Composable
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-    private fun isTab(): Boolean {
 
-        val windowSizeClass = calculateWindowSizeClass(activity = this)
-        val height = windowSizeClass.heightSizeClass
-
-        val isTab: Boolean =
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                height == WindowHeightSizeClass.Expanded
-            } else {
-                height != WindowHeightSizeClass.Compact
-            }
-        return isTab
-    }
 
 
     private fun onBackClick() {
@@ -400,7 +365,6 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
             val frgB = supportFragmentManager.findFragmentByTag(frgBTag)
             (frgB as FragmentTwo).resetInputs()
             isFrgBVisible = false
-            frgB.arguments = null
 
         } else  {
 
@@ -430,7 +394,6 @@ class MainActivity : AppCompatActivity(), FragmentOne.Action,
             }
             (frgB as FragmentTwo).resetInputs()
             isFrgBVisible = false
-            frgB.arguments = null
 
         } else super.onBackPressed()
     }

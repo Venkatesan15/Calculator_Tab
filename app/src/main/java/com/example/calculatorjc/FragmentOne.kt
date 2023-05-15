@@ -18,9 +18,6 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -31,7 +28,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import com.example.calculatorjc.ResourcesClass.Companion.reset
 import com.example.calculatorjc.ui.theme.black
 import com.example.calculatorjc.ui.theme.pink
 
@@ -50,14 +46,12 @@ class FragmentOne : Fragment() {
 
     private var isBtnDisabled by mutableStateOf(false)
 
-
     private val actionOrResItems = mutableStateListOf<ActionOrResItem>()
 
     private lateinit var callBack: Action
 
 
     companion object {
-
         const val resultAvailable = "ResultAvailable"
     }
 
@@ -82,35 +76,21 @@ class FragmentOne : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
 
-                val isTab: Boolean = isTab()
+                val isTab: Boolean = ResourcesClass.isTablet(context = context)
                 InflateActions(actionOrResItems, isTab)
             }
 
         }
     }
 
-    @Composable
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-    private fun isTab(): Boolean {
-        val windowSizeClass = calculateWindowSizeClass(requireActivity())
-        val height = windowSizeClass.heightSizeClass
 
-        val isTab: Boolean =
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                height == WindowHeightSizeClass.Expanded
-            } else {
-                height != WindowHeightSizeClass.Compact
-            }
-        return isTab
-    }
 
     private fun initialize() {
 
-        addObj = ActionOrResItem(buttonItem, ResourcesClass.addBtn)
-        subObj = ActionOrResItem(buttonItem, ResourcesClass.subtractBtn)
-        mulObj = ActionOrResItem(buttonItem, ResourcesClass.multiply)
-        divObj = ActionOrResItem(buttonItem, ResourcesClass.division)
-
+        addObj = ActionOrResItem(buttonItem, Actions.Add.name)
+        subObj = ActionOrResItem(buttonItem, Actions.Subtract.name)
+        mulObj = ActionOrResItem(buttonItem, Actions.Multiply.name)
+        divObj = ActionOrResItem(buttonItem, Actions.Division.name)
 
         //This function will add result(if result available) and reset button into the adapter when orientation change
         addResult()
@@ -131,8 +111,8 @@ class FragmentOne : Fragment() {
             )
             actionOrResItems.add(
                 ActionOrResItem(
-                    buttonItem,
-                    ResourcesClass.reset
+                    buttonItem, ResourcesClass.reset
+
                 )
             )
         }
@@ -166,7 +146,9 @@ class FragmentOne : Fragment() {
         ) {
 
             LazyColumn(
-                modifier = Modifier.background(backGround).fillMaxSize(),
+                modifier = Modifier
+                    .background(backGround)
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -177,10 +159,16 @@ class FragmentOne : Fragment() {
 
                         val mod: Modifier =
                         if(!isTab)
-                            Modifier.width(150.dp).animateItemPlacement()
-                        else Modifier.width(300.dp).padding( bottom = 30.dp).clip(
-                            CutCornerShape(topStart = 40.dp, bottomEnd = 40.dp)
-                        ).animateItemPlacement()
+                            Modifier
+                                .width(100.dp)
+                                .animateItemPlacement()
+                        else Modifier
+                            .width(300.dp)
+                            .padding(bottom = 30.dp)
+                            .clip(
+                                CutCornerShape(topStart = 40.dp, bottomEnd = 40.dp)
+                            )
+                            .animateItemPlacement()
 
                         ButtonItem(index = index, mod, isTab)
                     } else {
@@ -188,7 +176,11 @@ class FragmentOne : Fragment() {
                         Text(
                             text = actionOrResItems[index].text,
                             fontSize = 30.sp,
-                            modifier = Modifier.padding(20.dp).padding(bottom = 30.dp).animateItemPlacement().fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .padding(bottom = 30.dp)
+                                .animateItemPlacement()
+                                .fillMaxWidth(),
                             color = MaterialTheme.colors.onPrimary
                         )
                     }
@@ -217,7 +209,7 @@ class FragmentOne : Fragment() {
         Button(modifier = modifier,
             onClick = {
                     actionText = actionOrResItems[index].text
-                    if (actionText == reset) {
+                    if (actionText == ResourcesClass.reset) {
                         (activity as MainActivity).isTopAppBarVisible = false
                         resultText = ""
                         arguments = null
@@ -231,7 +223,7 @@ class FragmentOne : Fragment() {
             },
         enabled = !isBtnDisabled)
         {
-            val fontSize = if(!isTab) 15.sp else 20.sp
+            val fontSize = if(!isTab) 15.sp else 25.sp
             Text(text = actionOrResItems[index].text, fontSize = fontSize)
         }
     }

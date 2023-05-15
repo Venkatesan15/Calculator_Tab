@@ -1,6 +1,5 @@
 package com.example.calculatorjc
 
-import android.content.res.Configuration
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -22,9 +21,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,19 +67,17 @@ class FragmentTwo : Fragment() {
         btnText = text
     }
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
-        if (arguments?.getString(inputOneKey) != null) inputOne = requireArguments().getString(
-            inputOneKey
-        )!!
-
-        if (arguments?.getString(inputTwoKey) != null) inputTwo = requireArguments().getString(
-            inputTwoKey
-        )!!
+        arguments?.getString(inputOneKey)?.let {
+            inputOne = it
+        }
+        arguments?.getString(inputTwoKey)?.let {
+            inputTwo = it
+        }
 
         val view = ComposeView(requireContext())
 
@@ -92,19 +86,7 @@ class FragmentTwo : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-
-                val windowSizeClass = calculateWindowSizeClass(requireActivity())
-                val height = windowSizeClass.heightSizeClass
-
-                val isTab: Boolean =
-                if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    height == WindowHeightSizeClass.Expanded
-                    }
-
-                else  {
-                    height != WindowHeightSizeClass.Compact
-                }
-
+                val isTab: Boolean = ResourcesClass.isTablet(context = context)
                 InflateContent(isTab)
             }
         }
@@ -137,37 +119,36 @@ class FragmentTwo : Fragment() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(backGround)
-                ,
+                    .background(backGround),
                 verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val modifier = if (!isTab) Modifier
-                    .align(Alignment.CenterHorizontally)
+
+                val textFieldModifier = if (!isTab) Modifier
                     .padding(bottom = 30.dp)
                 else
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 120.dp)
-                        .align(Alignment.CenterHorizontally)
                         .padding(bottom = 30.dp)
-                InputOne(
-                    modifier, isTab
-                )
 
-                InputTwo(modifier = modifier, focusManager, isTab)
 
                 val btnModifier = if(!isTab) Modifier
-                    .align(Alignment.CenterHorizontally)
 
                 else {
                     Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 200.dp)
-                        .padding(bottom = 30.dp)
-                        .clip(
-                            CutCornerShape(topStart = 40.dp, bottomEnd = 40.dp)
-                        )
+                        .padding(top = 30.dp)
+                        .wrapContentWidth()
+                        .clip(CutCornerShape(10.dp))
                 }
+
+                InputOne(
+                    textFieldModifier, isTab
+                )
+
+                InputTwo(modifier = textFieldModifier, focusManager, isTab)
+
+
                 ActionButton(
                     btnModifier, focusManager, isTab
                 ) { animationVisibility = false }
@@ -179,20 +160,14 @@ class FragmentTwo : Fragment() {
     @Composable
     private fun InputOne(modifier: Modifier, isTab: Boolean) {
 
-        var dotCount by remember {
-            mutableStateOf(0)
-        }
         val labelSize = if(!isTab) 15.sp else 18.sp
+        val regex = Regex("\\d*\\.?\\d*")
         TextField (
             value = inputOne, onValueChange = {
-                if (!it.contains(',') && !it.contains(' ') && !it.contains('-')  ) {
-                    if (dotCount == 1)
-                    {
-                        if (it[it.length - 1] != '.') inputOne = it
-                    } else {
-                        if(it.contains('.')) dotCount++
-                        inputOne = it
-                    }
+                if (regex.matches(it)) {
+                    inputOne = it
+                } else {
+                    Toast.makeText(context,"${it[it.length - 1]} is not valid", Toast.LENGTH_SHORT).show()
                 }
             },
 
@@ -218,20 +193,15 @@ class FragmentTwo : Fragment() {
 
         val labelSize = if(!isTab) 15.sp else 18.sp
 
-        var dotCount by remember {
-            mutableStateOf(0)
-        }
+        val regex = Regex("\\d*\\.?\\d*")
+
         TextField (
             value = inputTwo,
             onValueChange = {
-                if (!it.contains(',') && !it.contains(' ') && !it.contains('-')  ) {
-                    if (dotCount == 1)
-                    {
-                        if (it[it.length - 1] != '.') inputTwo = it
-                    } else {
-                        if(it.contains('.')) dotCount++
-                        inputTwo = it
-                    }
+                if (regex.matches(it)) {
+                    inputTwo = it
+                } else {
+                    Toast.makeText(context,"${it[it.length - 1]} is not valid", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = modifier,
@@ -256,22 +226,21 @@ class FragmentTwo : Fragment() {
     ) {
 
         Button (onClick = {
-
             focusManager.clearFocus()
             onClick(function)
         }, modifier = modifier) {
             if (arguments?.getString(buttonText) != null) {
                 btnText = arguments?.getString(buttonText)!!
             }
-            val fontSize = if(!isTab) 15.sp else 30.sp
+            val fontSize = if(!isTab) 15.sp else 25.sp
             Text(text = btnText, fontSize = fontSize)
         }
     }
 
     private fun onClick(function: () -> Unit) {
 
-        if (inputTwo == "0" && btnText == "Division") {
-            Toast.makeText(context, "Divided by 0 Always infinite", Toast.LENGTH_SHORT).show()
+        if (inputTwo == "0" && btnText == Actions.Division.name) {
+            Toast.makeText(context, resources.getString(R.string.dividedByZero), Toast.LENGTH_SHORT).show()
         } else if (inputOne.isNotEmpty() && inputTwo.isNotEmpty() && inputOne != "." && inputTwo != ".") {
 
             function()
@@ -279,41 +248,35 @@ class FragmentTwo : Fragment() {
             generateResult(
                 inputOne,
                 inputTwo,
-                btnText
+                Actions.valueOf(btnText)
             )
-            inputOne = ""
-            inputTwo = ""
-            arguments = null
+            resetInputs()
 
         } else {
-            Toast.makeText(context, "Please Enter Valid Input", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,resources.getString(R.string.wrongInput), Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun generateResult(input1: String, input2: String, action: String) {
+    private fun generateResult(input1: String, input2: String, action: Actions) {
 
         try {
             val num1 = input1.toFloat()
             val num2 = input2.toFloat()
 
             val ans = when (action) {
-                "Add" -> (num1 + num2)
-                "Subtract" -> (num1 - num2)
-                "Multiply" -> (num1 * num2)
-                "Division" -> (num1 / num2)
-                else -> null!!
+                Actions.Add -> (num1 + num2)
+                Actions.Subtract -> (num1 - num2)
+                Actions.Multiply -> (num1 * num2)
+                Actions.Division -> (num1 / num2)
             }
 
             val format = DecimalFormat("0.#")
-
-            val resultText =
-                "Your Result is ${format.format(ans)} for inputs $input1 and $input2 with action $action"
-
+            val resultText = resources.getString (R.string.result, format.format(ans).toString(), input1, input2, action)
 
             callBack.sendResult(resultText)
         }
         catch (e: Exception) {
-            Toast.makeText(context, "Something went Wrong", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, resources.getString(R.string.error), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -321,14 +284,14 @@ class FragmentTwo : Fragment() {
     override fun onPause() {
 
         super.onPause()
-        if(inputOne.isNotEmpty()) arguments?.putString(inputOneKey, inputOne)
-
-        if(inputTwo.isNotEmpty()) arguments?.putString(inputTwoKey, inputTwo)
+        arguments?.putString(inputOneKey, inputOne)
+        arguments?.putString(inputTwoKey, inputTwo)
     }
 
     fun resetInputs() {
         inputTwo = ""
         inputOne = ""
+        arguments = null
     }
 }
 
